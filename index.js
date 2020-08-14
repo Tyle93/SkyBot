@@ -2,6 +2,8 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 const db = require("./DB.js")
 
+const token = process.argv[2]
+
 let database = null
 client.on("ready", () => {
     try{
@@ -50,5 +52,5 @@ function formatResponse(){
 
 }
 
-client.login("NzQyMTE4ODYzNTM3MzA3Njg5.XzBeDA.BHNDKcoAPoX19dI-8bxUcsY1kGE")
+client.login(token)
 
