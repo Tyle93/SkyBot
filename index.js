@@ -19,12 +19,11 @@ client.on("message", (message) => {
        return
     }else{
         try{
-            if(messageArr.length < 3){
-                message.reply("Invalid Command.")
-            }else{
-                let reply = parseCommand(messageArr, message.author.id)
-                message.reply(reply)
-            }
+            parseCommand(messageArr, message).then((result) => {
+                    message.reply(result)
+            }).catch((err) => {
+                message.reply(err)
+            })
         }catch(e){
             message.reply(e)
         }
@@ -35,38 +34,61 @@ function isCommand(message){
     return (message.charAt(0) === '!')
 }
 
-function parseCommand(params,id){
-    let reply = ""
-    switch(params[0]){
-        case "!register":
-            try{
-                if(params.length === 3){
-                    reply = db.registerProfile(database, id, params[1], params[2])
-                }else{
-                    reply = "Not enough arguements given."
+function parseCommand(params,message){
+    return new Promise((resolve,reject) =>{
+        switch(params[0]){
+            case "!register":
+                try{
+                    if(params.length === 3){
+                        resolve(db.registerProfile(database, message.author.id, params[1], params[2]))
+                    }else{
+                        reject("Incorrect Format.")
+                    }
+                }catch(e){
+                    reject(e);
                 }
-            }catch(e){
-                throw e;
+                break
+            case "!unregister":
+                break
+            case "!help":
+                resolve(" \
+                    -!register: \
+                    -!unregister:\
+                    -!help\
+                ")
+                break
+            case "!get":
+                let id = message.mentions.users.first().id
+                db.get_account(id).then((result) => {
+                    formatResponse(result).then((result) => {
+                        resolve(result)
+                    }).catch((err) => {
+                        reject(e)
+                    })
+                }).catch((err) => {
+                    reject(err)
+                })
+        }   
+    })
+}
+
+function formatResponse(result){
+    return new Promise((resolve,reject) => {
+        try{
+            let vals = Object.values(result);
+            let keys = Object.keys(result);
+            let response = "\n"
+            for(val in vals){
+                if(vals[val] && keys[val] != "id"){
+                    response += `${keys[val].toUpperCase()}: ${vals[val]}\n`
+                }
             }
-            break
-        case "!unregister":
-            break
-        case "!help":
-            reply = " \
-                -!register: \
-                -!unregister:\
-                -!help\
-            "
-            break
-    }   
-    return reply
+            resolve(response)
+        }catch(e){
+            reject(e)
+        }
+        
+    })
 }
-
-function formatResponse(){
-
-}
-
-
 
 client.login(token)
-

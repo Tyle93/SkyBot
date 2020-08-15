@@ -13,6 +13,7 @@ accountDict[AccountTypes.STEAM] = ["steam", "steamid"]
 accountDict[AccountTypes.ORIGIN] = ["origin", "originid"]
 accountDict[AccountTypes.ACTIVISION] = ["activision", "activisionid"]
 accountDict[AccountTypes.UPLAY] = ["uplay","uplayid"]
+let db = new sqlite.Database("./data/database.db")
 
 exports.initialize_db = () => {
     let db = new sqlite.Database("./data/database.db", (err) => {
@@ -65,6 +66,19 @@ function get_account_type(accountType){
     throw `${accountType} is not a valid account type.`
 }
 
+exports.get_account =  (id, accountType="*") => {
+    return new Promise((resolve,reject) =>{ 
+        db.get(`SELECT * FROM users WHERE id = \"${id}\"`, (err, result) => {
+            if (err) {
+                reject(err)
+            }
+            else {
+                resolve(result)
+            }
+        })
+    })
+}
+
 exports.create_table = (db, command) => {
     try{
         db.run(command)
@@ -72,6 +86,7 @@ exports.create_table = (db, command) => {
         console.log(e)
     }
 }
+
 
 exports.AccountTypes = AccountTypes
 
