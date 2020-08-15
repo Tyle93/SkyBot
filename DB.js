@@ -53,6 +53,7 @@ exports.registerProfile = (db, id, accountType, value) => {
     }
     return reply
 }
+
 function get_account_type(accountType){
     let values = Object.values(AccountTypes)
     for(let val in values){

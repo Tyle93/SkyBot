@@ -6,11 +6,19 @@ const token = process.argv[2]
 
 let database = null
 client.on("ready", () => {
+    client.user.setAvatar("./resources/Skybot.png")
     try{
         database = db.initialize_db()
     }catch(e){
         console.log(e)
     }
+})
+
+client.on("guildMemberAdd", (newMember) => {
+    newMember.user.send(`Hello ${newMember.user}, welcome to ${newMember.guild}! First and foremost,\
+ please make sure to check out and read the #roles! It has all the\
+instructions to unlock all the other channels for you!  Thank you for joining us,\
+and we hope you enjoy yourselves with our amazing community and its members!`)
 })
 
 client.on("message", (message) => {
@@ -51,10 +59,10 @@ function parseCommand(params,message){
             case "!unregister":
                 break
             case "!help":
-                resolve(" \
-                    -!register: \
-                    -!unregister:\
-                    -!help\
+                resolve(" \n\
+                    -!register: \n\
+                    -!unregister:\n\
+                    -!help\n\
                 ")
                 break
             case "!get":
@@ -86,8 +94,7 @@ function formatResponse(result){
             resolve(response)
         }catch(e){
             reject(e)
-        }
-        
+        }  
     })
 }
 
