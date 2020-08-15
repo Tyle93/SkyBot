@@ -68,5 +68,5 @@ function formatResponse(){
 
 
 
-client.login("NzQyMTE4ODYzNTM3MzA3Njg5.XzBeDA.3qIw912ITgarN9fqRa7NcIV4Ezc")
+client.login(token)
 
