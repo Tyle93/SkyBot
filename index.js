@@ -22,7 +22,8 @@ client.on("message", (message) => {
             if(messageArr.length < 3){
                 message.reply("Invalid Command.")
             }else{
-                parseCommand(messageArr, message.author.id)
+                let reply = parseCommand(messageArr, message.author.id)
+                message.reply(reply)
             }
         }catch(e){
             message.reply(e)
@@ -35,22 +36,37 @@ function isCommand(message){
 }
 
 function parseCommand(params,id){
+    let reply = ""
     switch(params[0]){
         case "!register":
             try{
-                db.registerProfile(database, id, params[1], params[2])
+                if(params.length === 3){
+                    reply = db.registerProfile(database, id, params[1], params[2])
+                }else{
+                    reply = "Not enough arguements given."
+                }
             }catch(e){
                 throw e;
             }
             break
         case "!unregister":
             break
+        case "!help":
+            reply = " \
+                -!register: \
+                -!unregister:\
+                -!help\
+            "
+            break
     }   
+    return reply
 }
 
 function formatResponse(){
 
 }
 
-client.login(token)
+
+
+client.login("NzQyMTE4ODYzNTM3MzA3Njg5.XzBeDA.3qIw912ITgarN9fqRa7NcIV4Ezc")
 

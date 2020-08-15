@@ -7,6 +7,13 @@ const AccountTypes = {BNET: "bnetid",
                             UPLAY: "uplayid"
 }
 
+let accountDict = {}
+accountDict[AccountTypes.BNET] = ["bnet","bnetid","battlenet","battlenetid"]
+accountDict[AccountTypes.STEAM] = ["steam", "steamid"]
+accountDict[AccountTypes.ORIGIN] = ["origin", "originid"]
+accountDict[AccountTypes.ACTIVISION] = ["activision", "activisionid"]
+accountDict[AccountTypes.UPLAY] = ["uplay","uplayid"]
+
 exports.initialize_db = () => {
     let db = new sqlite.Database("./data/database.db", (err) => {
         if(err){
@@ -26,50 +33,36 @@ exports.initialize_db = () => {
 }
 
 exports.registerProfile = (db, id, accountType, value) => {
-    switch(accountType){
-        case AccountTypes.BNET:
-            try{
-                let sqlStr = `INSERT INTO users (id,${AccountTypes.BNET}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${AccountTypes.BNET} = \"${value}\"`
-                db.run(sqlStr)
-            }catch(e){
-                console.log(e)
-            }
-            break
-        case AccountTypes.ORIGIN:
-            try{
-                let sqlStr = `INSERT INTO users (id,${AccountTypes.ORIGIN}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${AccountTypes.ORIGIN} = \"${value}\"`
-                db.run(sqlStr)
-            }catch(e){
-                console.log(e)
-            }
-            break
-        case AccountTypes.STEAM:
-            try{
-                let sqlStr = `INSERT INTO users (id,${AccountTypes.STEAM}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${AccountTypes.STEAM} = \"${value}\"`
-                db.run(sqlStr)
-            }catch(e){
-                console.log(e)
-            }
-            break
-        case AccountTypes.ACTIVISION:
-            try{
-                let sqlStr = `INSERT INTO users (id,${AccountTypes.ACTIVISION}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${AccountTypes.ACTIVISION} = \"${value}\"`
-                db.run(sqlStr)
-            }catch(e){
-                console.log(e)
-            }
-            break
-        case AccountTypes.UPLAY:
-            try{
-                let sqlStr = `INSERT INTO users (id,${AccountTypes.UPLAY}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${AccountTypes.UPLAY} = \"${value}\"`
-                db.run(sqlStr)
-            }catch(e){
-                console.log(e)
-            }
-            break
-        default: 
-            throw `\"${accountType}\" is not a valid account type.`
+    let reply = ""
+    let type = get_account_type(accountType)
+    if(type){
+        try{
+            let sqlStr = `INSERT INTO users (id,${type}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${AccountTypes.BNET} = \"${value}\"`
+            db.run(sqlStr, (err) => {
+                if(err){
+                    console.log(err)
+                    throw err
+                }
+            })
+            reply = `Succesfully registered ${type.toUpperCase()}: ${value}`
+        }catch(e){
+            console.log(e)
+            throw 'Failed to register account.'
+        }
     }
+    return reply
+}
+function get_account_type(accountType){
+    let values = Object.values(AccountTypes)
+    for(let val in values){
+        let arr = accountDict[values[val]];
+        for(i in arr){
+            if(arr[i] === accountType){
+                return values[val]
+            }
+        }
+    }
+    throw `${accountType} is not a valid account type.`
 }
 
 exports.create_table = (db, command) => {
@@ -81,3 +74,4 @@ exports.create_table = (db, command) => {
 }
 
 exports.AccountTypes = AccountTypes
+
