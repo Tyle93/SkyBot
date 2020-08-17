@@ -41,12 +41,14 @@ exports.registerProfile = (db, id, accountType, value) => {
             try{
                 db.run(`INSERT INTO users (id,${type}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${type} = \"${value}\"`, (err) => {
                     if(err){
+                        console.log(err)
                         reject(err)
                     }else{
                         resolve(`Succesfully registered ${type.toUpperCase()}: ${value}`)
                     }
                 })
             }catch(e){
+                console.log(e)
                 reject('Failed to register account.')
             }
         }
@@ -60,24 +62,23 @@ exports.removeProfile = (db, id, accountType="*") => {
             if(accountType === "*"){
                 db.run(`DELETE FROM users WHERE id = \"${id}\"`,(err) => {
                     if(err){
+                        console.log(err)
                         reject("Failed to unregister.")
                     }else{
                         resolve("Successfully unregistered")
                     }
                 })
             }else{
-                let type = null
-                try{
-                    type = get_account_type(accountType)
-                }catch(e){
-                    reject(e)
-                }
-                db.run(`UPDATE users SET ${type} = NULL WHERE id = \"${id}\"` , (err) =>{
-                    if(err){
-                        reject("Failed to ungregister.")
-                    }else{
-                        resolve("Successfully unregistered ")
-                    }
+                get_account_type(accountType).then((result) =>{
+                    db.run(`UPDATE users SET ${result} = NULL WHERE id = \"${id}\"` , (err) =>{
+                        if(err){
+                            reject("Failed to ungregister.")
+                        }else{
+                            resolve("Successfully unregistered ")
+                        }
+                    })
+                }).catch((err) => {
+                    reject(err)
                 })
             }
         }catch(e){
@@ -87,16 +88,19 @@ exports.removeProfile = (db, id, accountType="*") => {
 }
 
 function get_account_type(accountType){
-    let values = Object.values(AccountTypes)
-    for(let val in values){
-        let arr = accountDict[values[val]];
-        for(i in arr){
-            if(arr[i] === accountType){
-                return values[val]
+    return new Promise((resolve, reject) => {
+        let values = Object.values(AccountTypes)
+        for(let val in values){
+            let arr = accountDict[values[val]];
+            for(i in arr){
+                if(arr[i] === accountType){
+                    resolve(values[val])
+                }
             }
         }
-    }
-    throw `${accountType} is not a valid account type.`
+        reject(`${accountType} is not a valid account type.`)
+    })
+
 }
 
 exports.get_account =  (id, accountType="*") => {
