@@ -2,7 +2,7 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 const db = require("./DB.js")
 
-const token = process.argv[2] | process.env.discToken
+const token = process.env.discToken
 let database = null
 
 let commandDescriptionDict = {}
