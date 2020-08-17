@@ -2,7 +2,12 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 const db = require("./DB.js")
 
-const token = process.env.discToken
+let token = ""
+if(process.env.discToken){
+    token = process.env.discToken
+}else{
+    token = process.argv[2]
+}
 let database = null
 
 let commandDescriptionDict = {}
@@ -196,4 +201,8 @@ function getArgs(message){
     return message.content.toLowerCase().split(" ")
 }
 
-client.login(token)
+client.login(token).then(() => {
+    console.log("Successfully logged into client.")
+}).catch((err) => {
+    console.log(err)
+})

@@ -36,24 +36,19 @@ exports.initialize_db = () => {
 
 exports.registerProfile = (db, id, accountType, value) => {
     return new Promise((resolve,reject) => {
-        let type = get_account_type(accountType)
-        if(type){
-            try{
-                db.run(`INSERT INTO users (id,${type}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${type} = \"${value}\"`, (err) => {
-                    if(err){
-                        console.log(err)
-                        reject(err)
-                    }else{
-                        resolve(`Succesfully registered ${type.toUpperCase()}: ${value}`)
-                    }
-                })
-            }catch(e){
-                console.log(e)
-                reject('Failed to register account.')
-            }
-        }
+        get_account_type(accountType).then((result) => {
+            db.run(`INSERT INTO users (id,${result}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${result} = \"${value}\"`, (err) => {
+                if(err){
+                    console.log(err)
+                    reject(err)
+                }else{
+                    resolve(`Succesfully registered ${result.toUpperCase()}: ${value}`)
+                }
+            })
+        }).catch((err) => {
+            reject(err)
+        })
     })
-    
 }
 
 exports.removeProfile = (db, id, accountType="*") => {
