@@ -13,6 +13,7 @@ accountDict[AccountTypes.STEAM] = ["steam", "steamid"]
 accountDict[AccountTypes.ORIGIN] = ["origin", "originid"]
 accountDict[AccountTypes.ACTIVISION] = ["activision", "activisionid"]
 accountDict[AccountTypes.UPLAY] = ["uplay","uplayid"]
+
 let db = new sqlite.Database("./data/database.db")
 
 exports.initialize_db = () => {
@@ -34,24 +35,55 @@ exports.initialize_db = () => {
 }
 
 exports.registerProfile = (db, id, accountType, value) => {
-    let reply = ""
-    let type = get_account_type(accountType)
-    if(type){
-        try{
-            let sqlStr = `INSERT INTO users (id,${type}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${AccountTypes.BNET} = \"${value}\"`
-            db.run(sqlStr, (err) => {
-                if(err){
-                    console.log(err)
-                    throw err
-                }
-            })
-            reply = `Succesfully registered ${type.toUpperCase()}: ${value}`
-        }catch(e){
-            console.log(e)
-            throw 'Failed to register account.'
+    return new Promise((resolve,reject) => {
+        let type = get_account_type(accountType)
+        if(type){
+            try{
+                db.run(`INSERT INTO users (id,${type}) VALUES (\"${id}\",\"${value}\") ON CONFLICT (id) DO UPDATE SET ${type} = \"${value}\"`, (err) => {
+                    if(err){
+                        reject(err)
+                    }else{
+                        resolve(`Succesfully registered ${type.toUpperCase()}: ${value}`)
+                    }
+                })
+            }catch(e){
+                reject('Failed to register account.')
+            }
         }
-    }
-    return reply
+    })
+    
+}
+
+exports.removeProfile = (db, id, accountType="*") => {
+    return new Promise((resolve,reject) => {
+        try{
+            if(accountType === "*"){
+                db.run(`DELETE FROM users WHERE id = \"${id}\"`,(err) => {
+                    if(err){
+                        reject("Failed to unregister.")
+                    }else{
+                        resolve("Successfully unregistered")
+                    }
+                })
+            }else{
+                let type = null
+                try{
+                    type = get_account_type(accountType)
+                }catch(e){
+                    reject(e)
+                }
+                db.run(`UPDATE users SET ${type} = NULL WHERE id = \"${id}\"` , (err) =>{
+                    if(err){
+                        reject("Failed to ungregister.")
+                    }else{
+                        resolve("Successfully unregistered ")
+                    }
+                })
+            }
+        }catch(e){
+            reject("Failed to unreigster.")
+        }
+    })
 }
 
 function get_account_type(accountType){
@@ -69,25 +101,23 @@ function get_account_type(accountType){
 
 exports.get_account =  (id, accountType="*") => {
     return new Promise((resolve,reject) =>{ 
-        db.get(`SELECT * FROM users WHERE id = \"${id}\"`, (err, result) => {
-            if (err) {
-                reject(err)
-            }
-            else {
-                resolve(result)
-            }
-        })
+        try{
+            db.get(`SELECT * FROM users WHERE id = \"${id}\"`, (err, result) => {
+                if (err) {
+                    reject("No accounts found registered to that user.")      
+                }
+                else if(result){
+                    resolve(result)
+                }else{
+                    reject("No accounts found registered to that user.")
+                }
+            })
+        }catch(err){
+            console.log(err)
+            reject("No accounts found registered to that user.")
+        }
     })
 }
-
-exports.create_table = (db, command) => {
-    try{
-        db.run(command)
-    }catch(e){
-        console.log(e)
-    }
-}
-
 
 exports.AccountTypes = AccountTypes
 
