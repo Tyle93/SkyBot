@@ -111,7 +111,10 @@ commandDescriptionDict[Commands.HELP.name] = "\n\
 "
 commandDescriptionDict[Commands.UNREGISTER.name] = " "
 
+
+
 client.on("ready", () => {
+    
     client.user.setAvatar("./resources/Skybot.png").then(() => {
         console.log("Bot Avatar successfully set.")
     }).catch((err) => {
@@ -142,7 +145,11 @@ client.on("message", (message) => {
         try{
             parseCommand(params[0]).then((result) => {
                 result.exec(message).then((result) => {
-                    message.reply(result)
+                    message.reply(result).then((result) => {
+                        console.log(result)
+                    }).catch((err) => {
+                        console.log(err)
+                    })
                 }).catch((err) => {
                     message.reply(err)
                 })
@@ -179,21 +186,42 @@ function formatResponse(result){
         try{
             let vals = Object.values(result);
             let keys = Object.keys(result);
-            let response = "\n"
             let insertions = 0;
-            for(val in vals){
-                if(vals[val] && keys[val] != "id"){
-                    response += `\t${keys[val].toUpperCase()}: ${vals[val]}\n`
-                    insertions += 1
+            embedMessage().then((result) => {
+                for(val in vals){
+                    if(vals[val] && keys[val] != "id"){
+                        let icon = db.get_icons(keys[val])
+                        let emoji = client.emojis.cache.find(emoji => emoji.name === icon)
+                        result.addField(`${emoji}${keys[val].toUpperCase()}:`,`${vals[val]}`)
+                        insertions += 1
+                    }
                 }
-            }
-            if(insertions === 0){
-                reject("There are currently no accounts registered to this user.")
-            }
-            resolve(response)
+                if(insertions === 0){
+                    reject("There are currently no accounts registered to this user.")
+                }
+                resolve(result)
+            }).catch((err) => {
+                reject(err)
+            })
         }catch(e){
             reject(e)
         }  
+    })
+}
+
+function embedMessage(){
+    return new Promise((resolve,reject) => {
+        try{
+            let embed = new Discord.MessageEmbed()
+            .setAuthor("SkyBot")
+            .attachFiles(["./resources/SkyBot.png"])
+            .setTitle("Accounts", "attachment://SkyBot.png")
+            .setThumbnail("attachment://SkyBot.png")
+            .setTimestamp()
+            resolve(embed)
+        }catch(err){
+            reject(err)
+        }
     })
 }
 

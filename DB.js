@@ -1,18 +1,28 @@
 const sqlite = require("sqlite3")
 
-const AccountTypes = {BNET: "bnetid",
-                            ORIGIN: "originid",
-                            STEAM: "steamid",
-                            ACTIVISION: "activisionid",
-                            UPLAY: "uplayid"
+const AccountTypes = {
+    BNET: "bnetid",
+    ORIGIN: "originid",
+    STEAM: "steamid",
+    ACTIVISION: "activisionid",
+    UPLAY: "uplayid",
+    BUNGIE: "bungieid"
 }
 
 let accountDict = {}
+
 accountDict[AccountTypes.BNET] = ["bnet","bnetid","battlenet","battlenetid"]
 accountDict[AccountTypes.STEAM] = ["steam", "steamid"]
 accountDict[AccountTypes.ORIGIN] = ["origin", "originid"]
 accountDict[AccountTypes.ACTIVISION] = ["activision", "activisionid"]
 accountDict[AccountTypes.UPLAY] = ["uplay","uplayid"]
+accountDict[AccountTypes.BUNGIE] = ["bungie","bungieid"]
+
+accountIconDict = {}
+accountIconDict["skybot"] = "SkyBot"
+accountIconDict[AccountTypes.BNET] = "BnetIcon"
+accountIconDict[AccountTypes.STEAM] = "SteamIcon"
+accountIconDict[AccountTypes.ORIGIN] = "OriginIcon"
 
 let db = new sqlite.Database("./data/database.db")
 
@@ -95,7 +105,12 @@ function get_account_type(accountType){
         }
         reject(`${accountType} is not a valid account type.`)
     })
+}
 
+exports.get_icons = (account) => {
+    if(accountIconDict[account]){
+        return accountIconDict[account]
+    }
 }
 
 exports.get_account =  (id, accountType="*") => {
