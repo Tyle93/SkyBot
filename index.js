@@ -88,7 +88,18 @@ const Commands = {
             return new Promise((resolve,reject) => {
                 params = getArgs(message)
                 let id = message.mentions.users.first().id
-                db.get_account(id).then((result) => {
+                if(params.length === Commands.GETID.argMax){
+                    db.get_account(id,params[argMax-1]).then((result) => {
+                        formatResponse(result).then((result) => {
+                            resolve(result)
+                        }).catch((err) => {
+                            reject(err)
+                        })
+                    }).catch((err) => {
+                        reject(err)
+                    })
+                }else{
+                    db.get_account(id).then((result) => {
                     formatResponse(result).then((result) => {
                         resolve(result)
                     }).catch((err) => {
@@ -97,6 +108,7 @@ const Commands = {
                 }).catch((err) => {
                     reject(err)
                 })
+                }
             })
         }
     }
@@ -135,7 +147,7 @@ and we hope you enjoy yourselves with our amazing community and its members!`)
 })
 
 client.on("message", (message) => {
-    if(message.author.username === client.user.username){
+    if(message.author.bot){
         return
     }
     params = getArgs(message)

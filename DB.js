@@ -116,7 +116,7 @@ exports.get_icons = (account) => {
 exports.get_account =  (id, accountType="*") => {
     return new Promise((resolve,reject) =>{ 
         try{
-            db.get(`SELECT * FROM users WHERE id = \"${id}\"`, (err, result) => {
+            db.get(`SELECT ${accountType} FROM users WHERE id = \"${id}\"`, (err, result) => {
                 if (err) {
                     reject("No accounts found registered to that user.")      
                 }
